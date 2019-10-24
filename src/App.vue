@@ -17,10 +17,11 @@
           :class="{'no-select': !selectWay.php}"
           @click="selectWay.php=!selectWay.php"
         >php</div>
+        <!-- <div class="select-all" @click="selectAll">全选</div> -->
       </div>
       <div class="code-container">
         <div v-if="selectWay.twoKey">
-          <div class="label">double key Json:</div>
+          <div class="label">double key json:</div>
           <div style="position: relative;">
             <pre class="js-content code-content">{{getJsonText(data.dbkeyJson_col)}}</pre>
             <div class="copy" @click="copyText(getJsonText(data.dbkeyJson_col))">copy</div>
@@ -31,7 +32,7 @@
           </div>
         </div>
         <div v-if="selectWay.onekey">
-          <div class="label">Json:</div>
+          <div class="label">one key json:</div>
           <div style="position: relative;">
             <pre class="js-content code-content">{{getJsonText(data.json_col)}}</pre>
             <div class="copy" @click="copyText(getJsonText(data.json_col))">copy</div>
@@ -42,7 +43,7 @@
           </div>
         </div>
         <div v-if="selectWay.php">
-          <div class="label">Php:</div>
+          <div class="label">double key php:</div>
           <div style="position: relative;">
             <pre class="js-content code-content">{{data.dbkeyPhpCol}}</pre>
             <div class="copy" @click="copyText(data.dbkeyPhpCol)">copy</div>
@@ -51,10 +52,19 @@
             <pre class="js-content code-content">{{data.dbkeyPhpRow}}</pre>
             <div class="copy" @click="copyText(data.dbkeyPhpRow)">copy</div>
           </div>
+          <div class="label">one key php:</div>
+          <div style="position: relative;">
+            <pre class="js-content code-content">{{data.jsonPhpCol}}</pre>
+            <div class="copy" @click="copyText(data.jsonPhpCol)">copy</div>
+          </div>
+          <div style="position: relative;">
+            <pre class="js-content code-content">{{data.jsonPhpRow}}</pre>
+            <div class="copy" @click="copyText(data.jsonPhpRow)">copy</div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="desc" v-else>复制表格吧大兄弟</div>
+    <div class="desc" v-else>选择表格区域复制,在此次导出代码。</div>
     <div class="desc" v-if="!valid">
       <div>该程序用于将表格复制文本转换为json/php代码。</div>
       <div>
@@ -69,57 +79,89 @@
 </template>
 
 <script>
-import sdk from 'glut-app-sdk';
-import sheetToJson from './sheetToJson';
+import sdk from "glut-app-sdk";
+import sheetToJson from "./sheetToJson";
 
 export default {
-  name: 'app',
+  name: "app",
   data() {
     return {
-      data: '',
+      data: "",
       selectWay: { onekey: true, twoKey: true, php: true },
       valid: false
     };
   },
   created() {
     this.selectWay = JSON.parse(
-      localStorage.getItem('@@copy-select-way') || 'null'
+      localStorage.getItem("@@copy-select-way") || "null"
     ) || { onekey: true, twoKey: true, php: true };
-    this.valid = document.location.href.startsWith('https://docs.google.com');
+    this.valid = document.location.href.startsWith("https://docs.google.com");
     console.log(`valid:${this.valid}`);
     if (!this.valid) {
       return;
     }
-    document.addEventListener('copy', this.copyEvent);
-    sdk.setEventListener('close', () => {
+    document.addEventListener("copy", this.copyEvent);
+    sdk.setEventListener("close", () => {
       this.localStorage.setItem(
-        '@@copy-select-way',
+        "@@copy-select-way",
         this.selectWay || { onekey: true, twoKey: true, php: true }
       );
-      document.removeEventListener('copy', this.copyEvent);
+      document.removeEventListener("copy", this.copyEvent);
     });
     sdk.minWin();
   },
   methods: {
+    // 全选复制文档 todo
+    selectAll() {
+      function getEvt(keyCode, ctrl = true) {
+        let evtObj = document.createEvent("UIEvents");
+        evtObj.initUIEvent("keydown", true, true, window, 1);
+        delete evtObj.keyCode;
+        // 为了模拟keycode
+        if (typeof evtObj.keyCode === "undefined") {
+          Object.defineProperty(evtObj, "keyCode", { value: keyCode });
+        } else {
+          evtObj.key = String.fromCharCode(keyCode);
+        }
+        // 为了模拟ctrl键
+        if (typeof evtObj.ctrlKey === "undefined") {
+          Object.defineProperty(evtObj, "ctrlKey", { value: ctrl });
+        } else {
+          evtObj.ctrlKey = ctrl;
+        }
+        return evtObj;
+      }
+      const edtObj = document.querySelector("#docs-editor");
+      console.log("edtObj:", edtObj);
+      if (edtObj) {
+        const esc = getEvt(27, false);
+        edtObj.dispatchEvent(esc);
+      }
+      document.body.blur();
+      const ctrlA = getEvt(65);
+      document.body.dispatchEvent(ctrlA);
+      document.execCommand("Copy", "false", null);
+    },
     getJsonText(json) {
-      return JSON.stringify(json || {}, null, 4);
+      return JSON.stringify(json || {}, null, 2);
     },
     copyText(text) {
-      const inputEle = document.createElement('input');
-      inputEle.setAttribute('value', text);
-      inputEle.setAttribute('readonly', 'readonly');
+      console.log(text);
+      const inputEle = document.createElement("textarea");
+      inputEle.value = text;
+      inputEle.setAttribute("readonly", "readonly");
       document.body.appendChild(inputEle);
       inputEle.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
       document.body.removeChild(inputEle);
-      alert('表格文本已复制到剪贴板');
+      alert("表格文本已复制到剪贴板");
     },
     copyEvent(event) {
       var clipboardData = event.clipboardData || window.clipboardData;
       if (!clipboardData) {
         return;
       }
-      var text = clipboardData.getData('text/html');
+      var text = clipboardData.getData("text/html");
       if (!text) {
         return;
       }

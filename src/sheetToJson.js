@@ -85,7 +85,7 @@ function arrToJson(arr, major = 'col') {
   }
   if (major === 'col') {
     return arr.reduce(((res, cur) => {
-      res[cur[0].val] = cur.slice(1)
+      res[cur[0].val] = cur.slice(1).map(it => it.val)
       return res
     }), {})
   }
@@ -104,9 +104,19 @@ function dbkeyJsonToPhpCode(json) {
   const subKeys = Object.keys(json[keys[0]])
   return keys.map((it) => {
     const item = json[it]
-    const val = subKeys.map(subKey => `\t"${subKey}"=>'${item[subKey]}'`).join(',\n')
+    const val = subKeys.map(subKey => `\t"${subKey}"=>"${item[subKey]}"`).join(',\n')
     return `"${it}" => [\n${val}\n]`
   }).join(',\n')
+}
+
+// 单键json转php
+function jsonToPhpCode(json) {
+  const keys = Object.keys(json)
+  const rows = keys.map((it) => {
+    const item = json[it]
+    return `\t"${it}" => [${item.map(it => `"${it}"`).join(", ")}]`
+  }).join(',\n')
+  return `[\n${rows}\n]`
 }
 
 export default function htmlTransform(text) {
@@ -117,6 +127,8 @@ export default function htmlTransform(text) {
   const json_col = arrToJson(arr, 'col')
   const dbkeyPhpRow = dbkeyJsonToPhpCode(dbkeyJson_row)
   const dbkeyPhpCol = dbkeyJsonToPhpCode(dbkeyJson_col)
+  const jsonPhpRow = jsonToPhpCode(json_row)
+  const jsonPhpCol = jsonToPhpCode(json_col)
 
   return {
     dbkeyJson_row,
@@ -124,6 +136,8 @@ export default function htmlTransform(text) {
     json_row,
     json_col,
     dbkeyPhpRow,
-    dbkeyPhpCol
+    dbkeyPhpCol,
+    jsonPhpRow,
+    jsonPhpCol,
   }
 }
