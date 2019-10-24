@@ -28,7 +28,7 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|svg|jpg|gif)$/,
+        test: /\.(png|svg|jpg|gif|woff|ttf)$/,
         use: [
           {
             loader: 'url-loader'
@@ -40,7 +40,18 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, '../index.html'),
+      // template: path.resolve(__dirname, '../index.html'),
+      templateContent: `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Glut Vue App</title>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
+`
     }),
     new CleanWebpackPlugin(),
     new HappyPack({
