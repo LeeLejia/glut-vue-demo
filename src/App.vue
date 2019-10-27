@@ -1,64 +1,43 @@
 <template>
-  <div :id="$roodId" class="root-container">
-    <div class="text" v-for="text in logs" :key="text">{{text}}</div>
-  </div>
+  <div :id="$rootId" class="root-container">{{text}}</div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from "vue-property-decorator";
 import sdk from "glut-app-sdk";
 
-export default {
-  name: "app",
-  data() {
-    return {
-      logs: []
-    };
-  },
+@Component({
+  components: {}
+})
+export default class App extends Vue {
+  text: string = "请选择菜单";
   created() {
-    this.logs.push("小程序信息：");
-    this.logs.push(JSON.stringify(sdk.getAppInfo()));
     sdk.setMenuList([
       {
         title: "菜单1",
         callback: () => {
-          this.logs.push("点击了菜单1");
+          this.text = "点击菜单1";
         }
       },
       {
         title: "菜单2",
         callback: () => {
-          this.logs.push("点击了菜单2");
+          this.text = "点击菜单2";
+        }
+      },
+      {
+        title: "菜单3",
+        callback: () => {
+          this.text = "点击菜单3";
         }
       }
     ]);
-    sdk.setEventListener("close", () => {
-      this.logs.push("小程序关闭");
-    });
-    sdk.setEventListener("open", () => {
-      this.logs.push("打开小程序");
-    });
-    sdk.setEventListener("doubleOpen", () => {
-      this.logs.push("重复打开小程序");
-    });
-    sdk.setEventListener("mini", () => {
-      this.logs.push("窗口被最小化");
-    });
-    sdk.setEventListener("max", () => {
-      this.logs.push("窗口被最大化");
-    });
-    sdk.setEventListener("resize", () => {
-      this.logs.push("窗口被最小化或者最大化");
-    });
-  },
-  methods: {}
-};
-</script>
-
-<style lang="scss" scoped >
-.root-container {
-  .text {
-    text-align: left;
   }
 }
-</style>
+</script>
 
+<style lang="scss">
+.root-container {
+  color: #2c3e50;
+}
+</style>

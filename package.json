@@ -18,9 +18,19 @@
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9",
     "webpack-dev-server": "^3.8.2",
-    "webpack-merge": "^4.2.2"
+    "webpack-merge": "^4.2.2",
+    "@vue/cli-plugin-babel": "^3.11.0",
+    "@vue/cli-plugin-eslint": "^3.11.0",
+    "@vue/cli-plugin-typescript": "^3.11.0",
+    "@vue/cli-service": "^3.11.0",
+    "@vue/eslint-config-prettier": "^5.0.0",
+    "@vue/eslint-config-typescript": "^4.0.0",
+    "typescript": "^3.4.3"
   },
   "dependencies": {
+    "vue-class-component": "^7.0.2",
+    "vue-draggable-resizable-gorkys": "^2.2.0",
+    "vue-property-decorator": "^8.1.0",
     "@babel/preset-env": "^7.6.3",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
