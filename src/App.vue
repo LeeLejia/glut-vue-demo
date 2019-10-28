@@ -1,29 +1,46 @@
 <template>
   <div :id="$roodId" class="root-container" ref="root">
     <div class="search">
-      <!-- @input="onSearch" -->
-      <input class="input-box" v-model="docUrl" placeholder="Google Doc Link" />
-      <el-button icon="el-icon-data-analysis" type="primary" circle @click="onSearch"></el-button>
+      <!-- @input="onHandle" -->
+      <input class="url-input-box" v-model="docUrl" placeholder="Google Doc Link" />
+      <div class="on-handle" @click="onHandle">
+        <i class="el-icon-refresh"></i>
+      </div>
     </div>
     <div class="desc">输入多语言Excel表格链接</div>
     <div class="history" v-if="!docUrl">
       <div class="empty desc" v-if="history.length === 0">empty!</div>
-      <div class="item" v-for="item in history" :key="item" @click="docUrl=item,onSearch()">{{item}}</div>
+      <div class="item" v-for="item in history" :key="item" @click="docUrl=item,onHandle()">{{item}}</div>
     </div>
-    <div class="row">
-      <el-radio-group
-        v-model="type"
-        v-if="docUrl && report && report.warnList && report.warnList.length !== 0"
-      >
+    <div
+      class="option-row"
+      v-if="docUrl && report && report.warnList && report.warnList.length !== 0"
+    >
+      <el-radio-group v-model="type">
         <el-radio :label="'verbose'">verbose</el-radio>
         <el-radio :label="'error'">error</el-radio>
         <el-radio :label="'warn'">warn</el-radio>
       </el-radio-group>
+      <el-select v-model="lang" placeholder="选择语言" class="select-lang">
+        <el-option key="default" label="全部语言" value="-1"></el-option>
+        <el-option
+          v-for="(item, idx) in (report && report.langList || [])"
+          :key="item"
+          :label="item"
+          :value="idx"
+        ></el-option>
+      </el-select>
     </div>
     <div class="report" v-if="docUrl">
-      <div class="wait" v-if="report && report.status">没检查到问题</div>
-      <div class="item" v-for="warn in list" :key="warn.pos + warn.msg">
-        <span class="level" :class="{error: warn.level==='error'}">{{warn.level}}</span>
+      <div class="no-report" v-if="report && report.status">没检查到问题</div>
+      <div class="no-report" v-else-if="list.length === 0">该选项不存在问题</div>
+      <div
+        class="item"
+        :class="`item-${warn.level}`"
+        v-for="warn in list"
+        :key="warn.pos + warn.msg"
+      >
+        <span class="level">{{warn.level}}</span>
         <span class="pos">{{warn.pos}}</span>
         <span class="msg">{{warn.msg}}</span>
       </div>
@@ -43,41 +60,51 @@ export default {
       sheets: [],
       selectSheet: 0,
       docUrl: "",
+      lang: "-1",
       type: "verbose"
     };
   },
   computed: {
     list() {
       const type = this.type;
-      if (type === "verbose")
-        return (this.report && this.report.warnList) || [];
+      let reportType = [];
+      if (type === "verbose") {
+        reportType = (this.report && this.report.warnList) || [];
+      }
       if (type === "error") {
-        return (
+        reportType =
           (this.report &&
             this.report.warnList.filter(it => it.level === "error")) ||
-          []
-        );
+          [];
       }
       if (type === "warn") {
-        return (
+        reportType =
           (this.report &&
             this.report.warnList.filter(it => it.level === "warn")) ||
-          []
-        );
+          [];
       }
+      const lang = this.lang - 0;
+      if (lang === -1) {
+        return reportType;
+      }
+      return reportType.filter(
+        it => (it.pos || "").split("-")[1] === String.fromCharCode(66 + lang)
+      );
     }
   },
   created() {
+    this.history = JSON.parse(window.localStorage.getItem("URL_HISTORY")) || [];
+  },
+  mounted() {
     if (
       window.location.href.startsWith("https://docs.google.com/spreadsheets")
     ) {
       this.docUrl = window.location.href;
-      this.onSearch();
+      this.onHandle();
     }
-    this.history = JSON.parse(window.localStorage.getItem("URL_HISTORY")) || [];
   },
   methods: {
-    onSearch() {
+    onHandle() {
       if (!this.docUrl.startsWith("https://docs.google.com/spreadsheets")) {
         alert("请输入GoogleSheet链接");
         return;
@@ -103,73 +130,104 @@ export default {
           return;
         }
         this.report = (res.result && res.result.report) || null;
-        console.log(res.result);
+        // console.log(res.result);
       });
     }
   }
 };
 </script>
-
+<style lang="scss">
+body {
+  .el-select-dropdown.el-popper {
+    z-index: 9999 !important;
+  }
+}
+</style>
 <style lang="scss" scoped >
 .root-container {
-  padding: 10px 10px 20px 10px;
-  ::-webkit-scrollbar {
-    display: none;
-  }
-
   width: 400px;
   height: 400px;
-
+  padding: 10px 10px 20px 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow-y: hidden;
   align-items: center;
+  font-size: 14px;
 
-  .search {
-    height: 32px;
-    text-align: center;
+  ::-webkit-scrollbar {
+    display: none;
   }
 
-  .row {
-    width: 100%;
+  .search {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    .on-handle {
+      display: inline-block;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 25px;
+      transition: all 0.8s;
+      margin-left: 8px;
+      text-align: center;
+      border: 1px solid gray;
+
+      :hover {
+        color: #6767e6;
+        transform: rotate(270deg);
+      }
+    }
+
+    .url-input-box {
+      width: 250px;
+      padding: 5px 20px;
+      height: 18px;
+      line-height: 18px;
+      text-align: center;
+      border-radius: 21px;
+      font-size: 13px;
+      border: 1px solid rgb(187, 187, 187);
+      outline: none;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+      &:focus {
+        box-shadow: 1px 1px 2px 0 #c9c9c9;
+      }
+    }
+  }
+
+  .option-row {
+    width: 95%;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    margin-bottom: 30px;
-  }
+    margin-bottom: 10px;
+    z-index: 10000;
 
-  .selector {
-    margin: 0 50px 0 10px;
-    width: 140px;
-  }
-
-  .input-box {
-    width: 300px;
-    padding: 5px 20px;
-    height: 32px;
-    line-height: 32px;
-    text-align: center;
-    border-radius: 21px;
-    border: 1px solid rgb(187, 187, 187);
-    outline: none;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-
-    &:focus {
-      box-shadow: 1px 1px 2px 0 #c9c9c9;
+    /deep/ .el-radio {
+      color: #606266;
     }
-  }
 
-  .refresh {
-    width: 50px;
-    height: 32px;
-    margin-left: 15px;
-    display: inline-block;
-    font-size: 20px;
-    cursor: pointer;
-    &:active {
-      font-size: 18px;
+    /deep/ .el-input__inner {
+      height: 30px;
+      padding: 0 5px;
+    }
+
+    /deep/ .el-select__caret {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .select-lang {
+      width: 100px;
+      margin-left: 12px;
     }
   }
 
@@ -178,52 +236,72 @@ export default {
     width: 380px;
     overflow-y: scroll;
 
+    .no-report {
+      text-align: center;
+      margin: 30px;
+      color: rgb(187, 187, 187);
+    }
+
     .item {
-      margin-bottom: 20px;
+      margin-bottom: 8px;
       line-height: 25px;
       display: flex;
-      flex-direction: row;
-
+      justify-content: center;
+      align-items: flex-start;
       .level {
-        display: inline-block;
-        padding: 0 5px;
-        background: #9ad44d;
-        color: white;
-        border-radius: 5px;
-        height: 25px;
-      }
-      .error {
-        background: red;
-        color: white;
-      }
-      .pos {
-        margin: 0 5px;
-        display: inline-block;
-        border: 1px solid gray;
         font-weight: bold;
-        padding: 0 5px;
-        border-radius: 5px;
-        height: 25px;
+        width: 40px;
+        flex-shrink: 0;
       }
+
+      .pos {
+        width: 60px;
+        margin: 0 5px;
+        font-weight: bold;
+      }
+
       .msg {
         flex: 1;
-        // display: inline-block;
+      }
+    }
+
+    .item-warn {
+      .level {
+        color: green;
+      }
+      .pos {
+        color: #ef9e23;
+      }
+      .msg {
+        color: green;
+      }
+    }
+
+    .item-error {
+      .level {
+        color: #ca1616;
+      }
+      .pos {
+        color: #ef9e23;
+      }
+      .msg {
+        color: #ca1616;
       }
     }
   }
 
   .history {
+    width: 95%;
     .empty {
-      font-size: 18px;
+      font-size: 14px;
     }
     .item {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: 14px;
+      font-size: 12px;
       color: gray;
       margin: 15px;
-      width: 350;
       text-align: left;
       cursor: pointer;
       direction: rtl;
@@ -231,7 +309,7 @@ export default {
   }
 
   .desc {
-    font-size: 16px;
+    font-size: 13px;
     text-align: center;
     padding: 10px;
     color: rgb(206, 206, 206);
@@ -241,19 +319,6 @@ export default {
     width: 0;
     display: none;
   }
-}
-
-// anim
-.slide-fade-enter-active {
-  transition: all 0.3s ease;
-}
-.slide-fade-leave-active {
-  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
-}
-.slide-fade-enter,
-.slide-fade-leave-to {
-  transform: translateY(10px);
-  opacity: 0;
 }
 </style>
 
