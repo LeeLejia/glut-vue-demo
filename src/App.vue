@@ -1,9 +1,9 @@
 <template>
-  <div :id="$roodId" class="root-container" ref='root'>
+  <div :id="$roodId" class="root-container" ref="root">
     <div class="search">
       <!-- @input="onSearch" -->
       <input class="input-box" v-model="docUrl" placeholder="Google Doc Link" />
-       <el-button icon="el-icon-data-analysis" type="primary" circle @click="onSearch"></el-button>
+      <el-button icon="el-icon-data-analysis" type="primary" circle @click="onSearch"></el-button>
     </div>
     <div class="desc">输入多语言Excel表格链接</div>
     <div class="history" v-if="!docUrl">
@@ -13,7 +13,8 @@
     <div class="row">
       <el-radio-group
         v-model="type"
-        v-if="docUrl && report && report.warnList && report.warnList.length !== 0">
+        v-if="docUrl && report && report.warnList && report.warnList.length !== 0"
+      >
         <el-radio :label="'verbose'">verbose</el-radio>
         <el-radio :label="'error'">error</el-radio>
         <el-radio :label="'warn'">warn</el-radio>
@@ -31,8 +32,8 @@
 </template>
 
 <script>
-import sdk from 'glut-app-sdk';
-import {check} from './check.js';
+import sdk from "glut-app-sdk";
+import { check } from "./check.js";
 export default {
   data() {
     return {
@@ -67,7 +68,9 @@ export default {
     }
   },
   created() {
-    if (window.location.href.startsWith('https://docs.google.com/spreadsheets')) {
+    if (
+      window.location.href.startsWith("https://docs.google.com/spreadsheets")
+    ) {
       this.docUrl = window.location.href;
       this.onSearch();
     }
@@ -75,16 +78,16 @@ export default {
   },
   methods: {
     onSearch() {
-      if (!this.docUrl.startsWith('https://docs.google.com/spreadsheets')) {
-        alert('请输入GoogleSheet链接');
-        return
+      if (!this.docUrl.startsWith("https://docs.google.com/spreadsheets")) {
+        alert("请输入GoogleSheet链接");
+        return;
       }
       const loading = this.$loading({
         lock: true,
         target: this.$refs.root,
-        text: '检查中..',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
+        text: "检查中..",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)"
       });
       this.report = null;
       const urlSet = Array.from(new Set([this.docUrl, ...this.history])).slice(
@@ -93,15 +96,15 @@ export default {
       );
       this.history = urlSet;
       window.localStorage.setItem("URL_HISTORY", JSON.stringify(urlSet));
-      check(this.docUrl).then(res=>{
+      check(this.docUrl).then(res => {
         loading.close();
-        if (res.status === 0 ) {
-          alert('处理失败,请稍后重试');
-          return
+        if (res.status === 0) {
+          alert("处理失败,请稍后重试");
+          return;
         }
-        this.report = res.result && res.result.report || null
-        console.log(res.result)
-      })
+        this.report = (res.result && res.result.report) || null;
+        console.log(res.result);
+      });
     }
   }
 };
@@ -247,7 +250,8 @@ export default {
 .slide-fade-leave-active {
   transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
 }
-.slide-fade-enter, .slide-fade-leave-to {
+.slide-fade-enter,
+.slide-fade-leave-to {
   transform: translateY(10px);
   opacity: 0;
 }
