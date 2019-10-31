@@ -17,7 +17,7 @@
           :class="{'no-select': !selectWay.php}"
           @click="selectWay.php=!selectWay.php"
         >php</div>
-        <!-- <div class="select-all" @click="selectAll">全选</div> -->
+        <div class="select-all" @click="selectAll">全选</div>
       </div>
       <div class="code-container">
         <div v-if="selectWay.twoKey">
@@ -109,10 +109,7 @@ export default {
       document.removeEventListener("copy", this.copyEvent);
     });
     sdk.minWin();
-  },
-  methods: {
-    // 全选复制文档 todo
-    selectAll() {
+    document.selectAll = function() {
       function getEvt(keyCode, ctrl = true) {
         let evtObj = document.createEvent("UIEvents");
         evtObj.initUIEvent("keydown", true, true, window, 1);
@@ -141,6 +138,12 @@ export default {
       const ctrlA = getEvt(65);
       document.body.dispatchEvent(ctrlA);
       document.execCommand("Copy", "false", null);
+    };
+  },
+  methods: {
+    // 全选复制文档 todo
+    selectAll() {
+      document.selectAll && document.selectAll();
     },
     getJsonText(json) {
       return JSON.stringify(json || {}, null, 2);
