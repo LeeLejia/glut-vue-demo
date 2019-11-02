@@ -102,7 +102,7 @@ export default {
     }
     document.addEventListener("copy", this.copyEvent);
     sdk.setEventListener("close", () => {
-      this.localStorage.setItem(
+      localStorage.setItem(
         "@@copy-select-way",
         this.selectWay || { onekey: true, twoKey: true, php: true }
       );
