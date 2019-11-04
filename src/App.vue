@@ -52,7 +52,6 @@ export default {
 <style lang="scss" scoped >
 .root-container {
   .min-phone-content {
-    width: 350px;
     height: 520px;
     position: relative;
     bottom: -3px;
