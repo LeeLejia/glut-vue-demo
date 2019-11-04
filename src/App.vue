@@ -3,9 +3,7 @@
     <div class="search">
       <!-- @input="onHandle" -->
       <input class="url-input-box" v-model="docUrl" placeholder="Google Doc Link" />
-      <div class="on-handle" @click="onHandle">
-        <i class="el-icon-refresh"></i>
-      </div>
+      <img class="on-handle" @click="onHandle" src="@/assets/img/bt.svg" />
     </div>
     <div class="desc">输入多语言Excel表格链接</div>
     <div class="history" v-if="!docUrl">
@@ -33,7 +31,7 @@
     </div>
     <div class="report" v-if="docUrl">
       <div class="no-report" v-if="report && report.status">没检查到问题</div>
-      <div class="no-report" v-else-if="list.length === 0">该选项不存在问题</div>
+      <div class="no-report" v-else-if="report && !report.status && list.length === 0">该选项不存在问题</div>
       <div
         class="item"
         :class="`item-${warn.level}`"
@@ -93,14 +91,15 @@ export default {
     }
   },
   created() {
-    this.history = JSON.parse(window.localStorage.getItem("URL_HISTORY")) || [];
+    sdk.readConfig({ history: [] }).then(({ history }) => {
+      this.history = history;
+    });
   },
   mounted() {
     if (
       window.location.href.startsWith("https://docs.google.com/spreadsheets")
     ) {
       this.docUrl = window.location.href;
-      this.onHandle();
     }
   },
   methods: {
@@ -122,7 +121,7 @@ export default {
         5
       );
       this.history = urlSet;
-      window.localStorage.setItem("URL_HISTORY", JSON.stringify(urlSet));
+      sdk.saveConfig({ history: urlSet });
       check(this.docUrl).then(res => {
         loading.close();
         if (res.status === 0) {
@@ -138,6 +137,12 @@ export default {
 </script>
 <style lang="scss">
 body {
+  /deep/ .el-loading-text {
+    text-align: center;
+  }
+  /deep/ .el-loading-mask {
+    z-index: 99;
+  }
   .el-select-dropdown.el-popper {
     z-index: 9999 !important;
   }
@@ -167,27 +172,27 @@ body {
 
     .on-handle {
       display: inline-block;
-      width: 25px;
-      height: 25px;
+      width: 45px;
+      height: 45px;
       border-radius: 50%;
       text-align: center;
-      line-height: 25px;
-      transition: all 0.8s;
+      line-height: 45px;
+      transition: all 1s;
       margin-left: 8px;
       text-align: center;
       border: 1px solid gray;
 
-      :hover {
+      &:hover {
         color: #6767e6;
-        transform: rotate(270deg);
+        transform: rotate(200deg);
       }
     }
 
     .url-input-box {
       width: 250px;
       padding: 5px 20px;
-      height: 18px;
-      line-height: 18px;
+      height: 20px;
+      line-height: 20px;
       text-align: center;
       border-radius: 21px;
       font-size: 13px;
