@@ -32,14 +32,17 @@ export default {
     }
   },
   created() {
-    this.url =
-      localStorage.getItem("mini-phone-url") ||
-      "//music.163.com/outchain/player?type=2&id=409649814&auto=1&height=999";
-    this.murl = this.url;
+    sdk
+      .readConfig({ "mini-phone-url": "//www.npmjs.com/package/glut-app-sdk" })
+      .then(res => {
+        this.url = res["mini-phone-url"];
+      });
   },
   methods: {
     goUrl() {
-      localStorage.setItem("mini-phone-url", this.murl);
+      sdk.saveConfig({
+        "mini-phone-url": this.murl
+      });
       this.url = this.murl;
     }
   }
