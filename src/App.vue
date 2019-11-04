@@ -92,9 +92,11 @@ export default {
     };
   },
   created() {
-    this.selectWay = JSON.parse(
-      localStorage.getItem("@@copy-select-way") || "null"
-    ) || { onekey: true, twoKey: true, php: true };
+    sdk
+      .readConfig({ config: { onekey: true, twoKey: true, php: true } })
+      .then(({ config }) => {
+        this.selectWay = config;
+      });
     this.valid = document.location.href.startsWith("https://docs.google.com");
     console.log(`valid:${this.valid}`);
     if (!this.valid) {
@@ -102,49 +104,14 @@ export default {
     }
     document.addEventListener("copy", this.copyEvent);
     sdk.setEventListener("close", () => {
-      localStorage.setItem(
-        "@@copy-select-way",
-        this.selectWay || { onekey: true, twoKey: true, php: true }
-      );
+      sdk.saveConfig({
+        config: this.selectWay || { onekey: true, twoKey: true, php: true }
+      });
       document.removeEventListener("copy", this.copyEvent);
     });
     sdk.minWin();
-    document.selectAll = function() {
-      function getEvt(keyCode, ctrl = true) {
-        let evtObj = document.createEvent("UIEvents");
-        evtObj.initUIEvent("keydown", true, true, window, 1);
-        delete evtObj.keyCode;
-        // 为了模拟keycode
-        if (typeof evtObj.keyCode === "undefined") {
-          Object.defineProperty(evtObj, "keyCode", { value: keyCode });
-        } else {
-          evtObj.key = String.fromCharCode(keyCode);
-        }
-        // 为了模拟ctrl键
-        if (typeof evtObj.ctrlKey === "undefined") {
-          Object.defineProperty(evtObj, "ctrlKey", { value: ctrl });
-        } else {
-          evtObj.ctrlKey = ctrl;
-        }
-        return evtObj;
-      }
-      const edtObj = document.querySelector("#docs-editor");
-      console.log("edtObj:", edtObj);
-      if (edtObj) {
-        const esc = getEvt(27, false);
-        edtObj.dispatchEvent(esc);
-      }
-      document.body.blur();
-      const ctrlA = getEvt(65);
-      document.body.dispatchEvent(ctrlA);
-      document.execCommand("Copy", "false", null);
-    };
   },
   methods: {
-    // 全选复制文档 todo
-    selectAll() {
-      document.selectAll && document.selectAll();
-    },
     getJsonText(json) {
       return JSON.stringify(json || {}, null, 2);
     },
