@@ -1,38 +1,37 @@
 import sdk from 'glut-app-sdk';
 
-export function check(url) {
-  const checkUrl = `http://--/getLangReport?url=${encodeURIComponent(url)}`
-  return sdk.fetch(checkUrl).then(res => {
-    if (res.status === 0) {
-      return {
-        status: true,
-        result: JSON.parse(res.result)
-      }
-    }
-    return {
-      status: false,
-      msg: '处理失败'
-    }
-  })
+/**
+ * 解析google表格链接
+ */
+function parseGoogleDocUrl(url) {
+  var urlParts = url.split('/')
+  var hashPart = urlParts.pop()
+  var docUrl = urlParts.join('/')
+  var id = urlParts.pop()
+  var hash = hashPart.split('#').pop()
+  var downurl = docUrl + '/export?format=csv&id=' + id + '&' + hash
+  return downurl
 }
 
-fetch('https://docs.google.com/spreadsheets/d/1J1N_BLcgyDw-HrfM_BPnW8mwj40vhzVLMw_VnliQnK0/export?format=csv&id=1J1N_BLcgyDw-HrfM_BPnW8mwj40vhzVLMw_VnliQnK0&gid=0').then(res => res.text()).then(res => processData(res))
-
-function processData(allText) {
-  var allTextLines = allText.split(/\r\n|\n/);
-  var headers = allTextLines[0].split(',');
-  var lines = [];
-
-  for (var i = 1; i < allTextLines.length; i++) {
-    var data = allTextLines[i].split(',');
-    if (data.length == headers.length) {
-
-      var tarr = [];
-      for (var j = 0; j < headers.length; j++) {
-        tarr.push(headers[j] + ":" + data[j]);
-      }
-      lines.push(tarr);
+/**
+ * 解析表格，待优化
+ */
+function parseCSV(csvData) {
+  var rows = csvData.split(/\r\n|\n/)
+  var lines = []
+  for (var i = 0; i < rows.length; i++) {
+    var data = rows[i].split(',')
+    var tarr = []
+    for (var j = 0; j < data.length; j++) {
+      tarr.push(data[j])
     }
+    lines.push(tarr)
   }
-  console.log(lines)
+  return lines;
+}
+
+export function check(url) {
+  return sdk.fetch(parseGoogleDocUrl(url)).then(res => {
+    console.log(parseCSV(res))
+  })
 }
