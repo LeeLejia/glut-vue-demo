@@ -5,7 +5,8 @@
       <input class="url-input-box" v-model="docUrl" placeholder="Google Doc Link" />
       <img class="on-handle" @click="onHandle" src="@/assets/img/bt.svg" />
     </div>
-    <div class="desc">输入多语言Excel表格链接</div>
+    <div class="desc" v-if="!docUrl && !report">输入多语言Excel表格链接</div>
+    <div class="report-info" v-else v-for="item in report.reportList" :key="item.msg">{{item.msg}}</div>
     <div class="history" v-if="!docUrl">
       <div class="empty desc" v-if="history.length === 0">empty!</div>
       <div class="item" v-for="item in history" :key="item" @click="docUrl=item,onHandle()">{{item}}</div>
@@ -123,13 +124,14 @@ export default {
       this.history = urlSet;
       sdk.saveConfig({ history: urlSet });
       check(this.docUrl).then(res => {
+        console.log("report:", res);
         loading.close();
-        if (res.status === 0) {
+        if (res.status !== 0) {
           alert("处理失败,请稍后重试");
           return;
         }
-        this.report = (res.result && res.result.report) || null;
-        // console.log(res.result);
+        this.report = res.result || null;
+        console.log(res.result);
       });
     }
   }
@@ -150,9 +152,9 @@ body {
 </style>
 <style lang="scss" scoped >
 .root-container {
-  width: 400px;
-  height: 400px;
-  padding: 10px 10px 20px 10px;
+  width: 420px;
+  height: 480px;
+  padding: 10px 10px 0 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -184,7 +186,7 @@ body {
 
       &:hover {
         color: #6767e6;
-        transform: rotate(200deg);
+        transform: rotate(360deg);
       }
     }
 
@@ -204,6 +206,14 @@ body {
         box-shadow: 1px 1px 2px 0 #c9c9c9;
       }
     }
+  }
+
+  .report-info {
+    font-size: 13px;
+    color: green;
+    padding: 10px;
+    text-align: left;
+    width: 100%;
   }
 
   .option-row {

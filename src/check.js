@@ -1,4 +1,6 @@
-import sdk from 'glut-app-sdk';
+import sdk from 'glut-app-sdk'
+import inspect from './lang-inspector'
+import Papa from 'papaparse'
 
 /**
  * 解析google表格链接
@@ -13,25 +15,29 @@ function parseGoogleDocUrl(url) {
   return downurl
 }
 
-/**
- * 解析表格，待优化
- */
-function parseCSV(csvData) {
-  var rows = csvData.split(/\r\n|\n/)
-  var lines = []
-  for (var i = 0; i < rows.length; i++) {
-    var data = rows[i].split(',')
-    var tarr = []
-    for (var j = 0; j < data.length; j++) {
-      tarr.push(data[j])
-    }
-    lines.push(tarr)
-  }
-  return lines;
-}
-
 export function check(url) {
   return sdk.fetch(parseGoogleDocUrl(url)).then(res => {
-    console.log(parseCSV(res))
+    if (res.status !== 0) {
+      return res
+    }
+    const parseObj = Papa.parse(res.result)
+    const arr = parseObj && parseObj.data || []
+    console.log(arr)
+    const toArr = []
+    const h = arr.length || 0
+    const w = arr[0] && arr[0].length || 0
+    for (let i = 0; i < h; i++) {
+      for (let j = 0; j < w; j++) {
+        if (!toArr[j]) {
+          toArr[j] = []
+        }
+        toArr[j][i] = arr[i][j]
+      }
+    }
+    const report = inspect(toArr)
+    return {
+      status: 0,
+      result: report
+    };
   })
 }

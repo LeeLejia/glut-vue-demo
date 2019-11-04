@@ -175,7 +175,7 @@ function checkMulLang(row, rowIdx, uilangIdx) {
 }
 
 // 处理
-function handle(langData, conf) {
+module.exports = function inspect(langData, conf) {
   langCount = 0
   langValid = 0
   config = Object.assign({}, _config, conf)
@@ -234,17 +234,4 @@ function handle(langData, conf) {
   })
   result.status = result.warnList.length === 0
   return result
-}
-
-module.exports = function inspect(message, options = {}) {
-  const whichSheet = options && (options.sheet - 1) || 0
-  if (message.type === "data") {
-    const excelDatas = message.data[whichSheet]
-    const report = handle(excelDatas, options)
-    // printer.printReport(report)
-    options.dataCb && options.dataCb(report)
-  } else if (message.type === "sheet-info") {
-    options.infoCb && options.infoCb(message.data)
-    // printer.printSheetList(message.data, whichSheet)
-  }
 }
