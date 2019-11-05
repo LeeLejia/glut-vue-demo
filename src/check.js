@@ -21,11 +21,30 @@ export function check(url) {
       return res
     }
     const parseObj = Papa.parse(res.result)
-    const arr = parseObj && parseObj.data || []
+    let arr = parseObj && parseObj.data || []
+    let deleteCount = 0
+    for (let i = arr[0].length - 1; i >= 0; i--) {
+      let empty = true
+      for (let j = 0; j < arr.length; j++) {
+        if (arr[j][i].trim()) {
+          empty = false
+          break
+        }
+      }
+      if (empty) {
+        deleteCount++
+      } else {
+        break
+      }
+    }
+    if (deleteCount) {
+      arr = arr.map(it => it.slice(0, -deleteCount))
+    }
     console.log(arr)
     const toArr = []
     const h = arr.length || 0
     const w = arr[0] && arr[0].length || 0
+
     for (let i = 0; i < h; i++) {
       for (let j = 0; j < w; j++) {
         if (!toArr[j]) {
