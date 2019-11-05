@@ -4,23 +4,17 @@
       <div class="type-list">
         <div
           class="action"
-          :class="{'no-select': !selectWay.onekey}"
-          @click="selectWay.onekey=!selectWay.onekey"
-        >1-Key</div>
-        <div
-          class="action"
-          :class="{'no-select': !selectWay.twoKey}"
-          @click="selectWay.twoKey=!selectWay.twoKey"
-        >2-Key</div>
+          :class="{'no-select': !selectWay.json}"
+          @click="selectWay = {...selectWay, json: !selectWay.json}"
+        >json</div>
         <div
           class="action"
           :class="{'no-select': !selectWay.php}"
-          @click="selectWay.php=!selectWay.php"
+          @click="selectWay = {...selectWay, php: !selectWay.php}"
         >php</div>
-        <div class="select-all" @click="selectAll">全选</div>
       </div>
       <div class="code-container">
-        <div v-if="selectWay.twoKey">
+        <div v-if="selectWay.json">
           <div class="label">double key json:</div>
           <div style="position: relative;">
             <pre class="js-content code-content">{{getJsonText(data.dbkeyJson_col)}}</pre>
@@ -30,8 +24,6 @@
             <pre class="js-content code-content">{{getJsonText(data.dbkeyJson_row)}}</pre>
             <div class="copy" @click="copyText(getJsonText(data.dbkeyJson_row))">copy</div>
           </div>
-        </div>
-        <div v-if="selectWay.onekey">
           <div class="label">one key json:</div>
           <div style="position: relative;">
             <pre class="js-content code-content">{{getJsonText(data.json_col)}}</pre>
@@ -87,16 +79,14 @@ export default {
   data() {
     return {
       data: "",
-      selectWay: { onekey: true, twoKey: true, php: true },
+      selectWay: { json: true, php: true },
       valid: false
     };
   },
   created() {
-    sdk
-      .readConfig({ config: { onekey: true, twoKey: true, php: true } })
-      .then(({ config }) => {
-        this.selectWay = config;
-      });
+    sdk.readConfig({ config: { json: true, php: true } }).then(({ config }) => {
+      this.selectWay = config;
+    });
     this.valid = document.location.href.startsWith("https://docs.google.com");
     console.log(`valid:${this.valid}`);
     if (!this.valid) {
@@ -105,7 +95,7 @@ export default {
     document.addEventListener("copy", this.copyEvent);
     sdk.setEventListener("close", () => {
       sdk.saveConfig({
-        config: this.selectWay || { onekey: true, twoKey: true, php: true }
+        config: this.selectWay || { json: true, php: true }
       });
       document.removeEventListener("copy", this.copyEvent);
     });
@@ -137,7 +127,6 @@ export default {
       }
       const result = sheetToJson(text);
       this.data = result;
-      console.log(result);
       sdk.maxWin();
     }
   }
