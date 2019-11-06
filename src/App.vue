@@ -49,6 +49,12 @@ export default {
     sdk.setEventListener("resize", () => {
       this.logs.push("窗口被最小化或者最大化");
     });
+    sdk.saveConfig({ a: 2222222 });
+    setTimeout(res => {
+      sdk.readConfig({ a: "xx", c: "xx" }).then(res => {
+        console.log(res);
+      });
+    }, 1000);
   },
   methods: {}
 };
