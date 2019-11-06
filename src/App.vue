@@ -12,6 +12,11 @@
           :class="{'no-select': !selectWay.php}"
           @click="selectWay = {...selectWay, php: !selectWay.php}"
         >php</div>
+        <div
+          class="action"
+          :class="{'no-select': !selectWay.xml}"
+          @click="selectWay = {...selectWay, xml: !selectWay.xml}"
+        >xml</div>
       </div>
       <div class="code-container">
         <div v-if="selectWay.json">
@@ -54,9 +59,19 @@
             <div class="copy" @click="copyText(data.jsonPhpRow)">copy</div>
           </div>
         </div>
+        <div v-if="selectWay.xml">
+          <div class="label">xml(ctrl + a, ctrl + c 选中整个文档):</div>
+          <div style="position: relative;">
+            <pre class="xml-content code-content">{{getXmlString(data.xmlObj)}}</pre>
+            <div class="copy" @click="download(data.xmlObj)">下载</div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="desc" v-else>选择表格区域复制,在此次导出代码。</div>
+    <div class="desc" v-else-if="valid">
+      <div>选择表格区域复制,在此次导出代码。</div>
+      <div>在表格中使用 ctrl + a, ctrl + c 选中并复制整个表格</div>
+    </div>
     <div class="desc" v-if="!valid">
       <div>该程序用于将表格复制文本转换为json/php代码。</div>
       <div>
@@ -72,21 +87,25 @@
 
 <script>
 import sdk from "glut-app-sdk";
-import sheetToJson from "./sheetToJson";
+import sheetToCode from "./sheetToCode";
+import JSZip from "jszip";
 
 export default {
   name: "app",
   data() {
     return {
       data: "",
-      selectWay: { json: true, php: true },
-      valid: false
+      selectWay: { json: true, php: true, xml: false },
+      valid: false,
+      downloading: false
     };
   },
   created() {
-    sdk.readConfig({ config: { json: true, php: true } }).then(({ config }) => {
-      this.selectWay = config;
-    });
+    sdk
+      .readConfig({ config: { json: true, php: true, xml: false } })
+      .then(({ config }) => {
+        this.selectWay = config;
+      });
     this.valid = document.location.href.startsWith("https://docs.google.com");
     console.log(`valid:${this.valid}`);
     if (!this.valid) {
@@ -95,13 +114,50 @@ export default {
     document.addEventListener("copy", this.copyEvent);
     sdk.setEventListener("close", () => {
       sdk.saveConfig({
-        config: this.selectWay || { json: true, php: true }
+        config: this.selectWay || { json: true, php: true, xml: false }
       });
       document.removeEventListener("copy", this.copyEvent);
     });
     sdk.minWin();
   },
   methods: {
+    getXmlString(xmlObj) {
+      return Object.keys(xmlObj)
+        .map(it => {
+          return `file: ${it}.xml\n${xmlObj[it]}`;
+        })
+        .join("\n-----------------------\n");
+    },
+    download(xmlObj) {
+      if (this.downloading) {
+        return;
+      }
+      this.downloading = true;
+      var zip = new JSZip();
+      var xml = zip.folder("xml");
+      Object.keys(xmlObj).forEach(it => {
+        xml.file(`${it}.xml`, xmlObj[it]);
+      });
+      zip
+        .generateAsync({ type: "blob" })
+        .then(content => {
+          const aLink = document.createElement("a");
+          var blob = new Blob([content], {
+            type: "text/plain;charset=UTF-8"
+          });
+          var evt = new Event("click");
+          aLink.download = "google-doc-to-xml.zip";
+          aLink.href = URL.createObjectURL(blob);
+          aLink.click();
+          URL.revokeObjectURL(blob);
+          this.downloading = false;
+        })
+        .catch(err => {
+          this.downloading = false;
+          console.log(err);
+          alert("下载失败");
+        });
+    },
     getJsonText(json) {
       return JSON.stringify(json || {}, null, 2);
     },
@@ -125,7 +181,7 @@ export default {
       if (!text) {
         return;
       }
-      const result = sheetToJson(text);
+      const result = sheetToCode(text);
       this.data = result;
       sdk.maxWin();
     }

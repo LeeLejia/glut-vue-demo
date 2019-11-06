@@ -119,6 +119,21 @@ function jsonToPhpCode(json) {
   return `[\n${rows}\n]`
 }
 
+// 双键转xml文档
+function jsonToXmlObj(json) {
+  return Object.keys(json).reduce((res, it) => {
+    const data = json[it]
+    const list = Object.keys(data).map(item => `<string name="${item}">${data[item]}</string>`)
+    res[it] = `<resources>
+  <!-- 多语言翻译说明 -->
+  <!-- 目前仅根据该源文件翻译：-->
+  <!-- en , ar , bn-rBD , bn-rIN , gu , hi , kn , mr , ne , pa , ru , si , ta , te , ur , uz , zh-rCN -->
+  ${list.join('\n  ')}
+</resources>`
+    return res
+  }, {})
+}
+
 export default function htmlTransform(text) {
   const arr = htmlToArr(text);
   const dbkeyJson_row = arrToJson_doublekey(arr, 'row')
@@ -129,7 +144,8 @@ export default function htmlTransform(text) {
   const dbkeyPhpCol = dbkeyJsonToPhpCode(dbkeyJson_col)
   const jsonPhpRow = jsonToPhpCode(json_row)
   const jsonPhpCol = jsonToPhpCode(json_col)
-
+  const xmlObj = jsonToXmlObj(dbkeyJson_row)
+  console.log('xmlList:', xmlObj)
   return {
     dbkeyJson_row,
     dbkeyJson_col,
@@ -139,5 +155,6 @@ export default function htmlTransform(text) {
     dbkeyPhpCol,
     jsonPhpRow,
     jsonPhpCol,
+    xmlObj
   }
 }
