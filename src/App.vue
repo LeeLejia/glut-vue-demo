@@ -32,11 +32,10 @@ export default {
     }
   },
   created() {
-    sdk
-      .readConfig({ "mini-phone-url": "//www.npmjs.com/package/glut-app-sdk" })
-      .then(res => {
-        this.url = res["mini-phone-url"];
-      });
+    sdk.readConfig({ "mini-phone-url": "https://www.baidu.com/" }).then(res => {
+      this.url = res["mini-phone-url"];
+      this.murl = res["mini-phone-url"];
+    });
   },
   methods: {
     goUrl() {
