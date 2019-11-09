@@ -7,6 +7,9 @@ const HappyPack = require('happypack')
 const os = require('os')
 module.exports = {
   entry: path.resolve(__dirname, '../src/index.js'),
+  watchOptions: {
+    ignored: /node_modules/
+  },
   module: {
     rules: [
       {

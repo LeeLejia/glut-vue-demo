@@ -8,11 +8,8 @@ module.exports = merge(common, {
   devtool: 'inline-source-map',
   devServer: {
     contentBase: '../dist',
-    // 开启此参数需确保防火墙已经开放设置的端口
-    useLocalIp: false,
-    port: 5656,
-    // 设置https为了在多数网站下可以调试
-    https: true
+    useLocalIp: true,
+    port: 5656
   },
   stats: {
     modules: false,
