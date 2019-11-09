@@ -7,6 +7,9 @@ const HappyPack = require('happypack')
 const os = require('os')
 module.exports = {
   entry: path.resolve(__dirname, '../src/index.js'),
+  watchOptions: {
+    ignored: /node_modules/
+  },
   module: {
     rules: [
       {
@@ -28,7 +31,7 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|svg|jpg|gif|woff|ttf)$/,
+        test: /\.(png|svg|jpg|gif)$/,
         use: [
           {
             loader: 'url-loader'
@@ -40,18 +43,7 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
     new HtmlWebpackPlugin({
-      // template: path.resolve(__dirname, '../index.html'),
-      templateContent: `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Glut Vue App</title>
-  </head>
-  <body>
-    <div id="app"></div>
-  </body>
-</html>
-`
+      template: path.resolve(__dirname, '../index.html'),
     }),
     new CleanWebpackPlugin(),
     new HappyPack({
