@@ -1,5 +1,5 @@
 <template>
-  <div :id="$roodId" class="root-container">
+  <div :id="$roodId">
     <div class="min-phone-action">
       <input class="min-phone-input" autocomplete="on" v-model="murl" placeholder="输入链接 🔗" />
       <div class="min-phone-bt" @click="goUrl">Go</div>
@@ -49,9 +49,9 @@ export default {
 </script>
 
 <style lang="scss" scoped >
-.root-container {
+#Glut-App-__GLUT_APP_ID__ {
   .min-phone-content {
-    height: 520px;
+    height: 500px;
     position: relative;
     bottom: -3px;
   }
