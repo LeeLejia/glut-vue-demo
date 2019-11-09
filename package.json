@@ -28,7 +28,7 @@
     "babel-preset-stage-2": "^6.24.1",
     "clean-webpack-plugin": "^3.0.0",
     "css-loader": "^3.2.0",
-    "glut-app-sdk": "latest",
+    "glut-app-sdk": "lastest",
     "happypack": "^5.0.1",
     "node-sass": "^4.12.0",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
