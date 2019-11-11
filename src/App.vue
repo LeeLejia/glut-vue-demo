@@ -6,7 +6,13 @@
       <img class="on-handle" @click="onHandle" src="@/assets/img/bt.svg" />
     </div>
     <div class="desc" v-if="!docUrl && !report">输入多语言Excel表格链接</div>
-    <div class="report-info" v-else v-for="item in report.reportList" :key="item.msg">{{item.msg}}</div>
+    <!-- 初始化 -->
+    <div
+      class="report-info"
+      v-else-if="docUrl && report"
+      v-for="item in (report && report.reportList ||[])"
+      :key="item.msg"
+    >{{item.msg}}</div>
     <div class="history" v-if="!docUrl">
       <div class="empty desc" v-if="history.length === 0">empty!</div>
       <div class="item" v-for="item in history" :key="item" @click="docUrl=item,onHandle()">{{item}}</div>
@@ -97,11 +103,12 @@ export default {
     });
   },
   mounted() {
-    if (
-      window.location.href.startsWith("https://docs.google.com/spreadsheets")
-    ) {
-      this.docUrl = window.location.href;
-    }
+    // if (
+    //   window.location.href.startsWith("https://docs.google.com/spreadsheets")
+    // ) {
+    //   this.docUrl = window.location.href;
+    //   this.onHandle();
+    // }
   },
   methods: {
     onHandle() {
