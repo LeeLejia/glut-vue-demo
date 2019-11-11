@@ -103,12 +103,12 @@ export default {
     });
   },
   mounted() {
-    // if (
-    //   window.location.href.startsWith("https://docs.google.com/spreadsheets")
-    // ) {
-    //   this.docUrl = window.location.href;
-    //   this.onHandle();
-    // }
+    if (
+      window.location.href.startsWith("https://docs.google.com/spreadsheets")
+    ) {
+      this.docUrl = window.location.href;
+      // this.onHandle();
+    }
   },
   methods: {
     onHandle() {
@@ -158,7 +158,7 @@ body {
 }
 </style>
 <style lang="scss" scoped >
-.root-container {
+#Glut-App-__GLUT_APP_ID__ .root-container {
   width: 420px;
   height: 480px;
   padding: 10px 10px 0 10px;
