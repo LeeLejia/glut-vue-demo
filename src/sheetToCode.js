@@ -136,6 +136,9 @@ function jsonToXmlObj(json) {
 
 export default function htmlTransform(text) {
   const arr = htmlToArr(text);
+  if (arr.length === 0) {
+    alert('操作可能失败!如果文档表格有背景色，请将删除背景或者将该文档剔除背景拷贝到新文档')
+  }
   const dbkeyJson_row = arrToJson_doublekey(arr, 'row')
   const dbkeyJson_col = arrToJson_doublekey(arr, 'col')
   const json_row = arrToJson(arr, 'row')
