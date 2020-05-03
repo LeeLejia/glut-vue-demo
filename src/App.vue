@@ -211,6 +211,7 @@ export default {
       alert("表格文本已复制到剪贴板");
     },
     copyEvent(event) {
+      debugger;
       var clipboardData = event.clipboardData || window.clipboardData;
       if (!clipboardData) {
         return;

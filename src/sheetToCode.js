@@ -1,7 +1,7 @@
 function htmlToArr(text) {
   let dom = document.createElement(`div`)
   dom.innerHTML = text
-  dom = dom.children && dom.children[2] && dom.children[2].children[1]
+  dom = dom.querySelector('table tbody')
   if (!dom) {
     return []
   }
@@ -104,8 +104,8 @@ function dbkeyJsonToPhpCode(json) {
   const subKeys = Object.keys(json[keys[0]])
   return keys.map((it) => {
     const item = json[it]
-    const val = subKeys.map(subKey => `\t"${subKey}"=>"${item[subKey]}"`).join(',\n')
-    return `"${it}" => [\n${val}\n]`
+    const val = subKeys.map(subKey => `\t"${(subKey || '').replace(/"/g, '\\"')}"=>"${(item[subKey] || '').replace(/"/g, '\\"')}"`).join(',\n')
+    return `"${(it || '').replace(/"/g, '\\"')}" => [\n${val}\n]`
   }).join(',\n')
 }
 
@@ -114,7 +114,7 @@ function jsonToPhpCode(json) {
   const keys = Object.keys(json)
   const rows = keys.map((it) => {
     const item = json[it]
-    return `\t"${it}" => [${item.map(it => `"${it}"`).join(", ")}]`
+    return `\t"${(it || '').replace(/"/g, '\\"')}" => [${item.map(it => `"${(it || '').replace(/"/g, '\\"')}"`).join(", ")}]`
   }).join(',\n')
   return `[\n${rows}\n]`
 }
